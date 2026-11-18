@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0d10">
+<title>Робот · без облака</title>
+<!--
+  ПУЛЬТ БЕЗ ОБЛАКА (18.11.2026) — запасной на крайний случай: ElevenLabs, интернет или мозг легли, а робот должен говорить.
+  - никакого мозга и микрофона: только заранее записанные фразы — робот физически не может заговорить сам;
+  - движок — пульт-сценарий Robby (DGAO 14.11): записи кладутся в память телефона, после первого открытия
+    пульт открывается и играет без интернета (sw.js);
+  - 🇩🇪/🇬🇧 вверху — на каком языке играют ВСЕ кнопки; у кнопки с ↻ несколько вариантов — каждое нажатие следующий;
+  - одна запись за раз: новая обрывает старую; повторное нажатие на играющую — стоп.
+  СОБИРАЕТСЯ, НЕ ПРАВИТСЯ РУКАМИ: тексты — fraze.json в папке пульта → python3 scripts/offline_pult.py <папка> → выложить.
+-->
+<style>
+:root{
+  --bg:#0c0d10; --panel:#16181d; --line:#2a2e36; --txt:#ececec; --dim:#9aa0aa; --faint:#6b717c;
+  --acc:#e0b040; --plate:#1e2733; --en:#2f6fd6; --ok:#57c785; --bad:#ff6b5a; --open:#e0b040;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden;overscroll-behavior:none}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+header{flex:none;background:var(--panel);border-bottom:1px solid var(--line);padding:8px 16px 6px;padding-top:max(8px,env(safe-area-inset-top))}
+.hrow{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.hrow2{display:flex;align-items:center;gap:8px;margin-top:6px}
+.ttl{font-weight:700;font-size:15px;color:var(--acc);white-space:nowrap}
+.ver{font-size:11px;color:var(--faint)}
+#mem{color:var(--dim);white-space:nowrap;border:0;background:none;padding:2px 0;font-family:inherit;font-size:12px}
+#mem.ok{color:var(--ok)} #mem.bad{color:var(--bad);font-weight:700}
+#lang{flex:none;height:40px;min-width:76px;border-radius:10px;border:2px solid var(--acc);background:#1c1f26;color:var(--txt);
+  font-weight:800;font-size:15px;font-family:inherit;touch-action:manipulation;padding:0 8px}
+#lang.en{background:var(--en);border-color:var(--en);color:#fff}
+#nav{flex:1;display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+#nav button{flex:1 0 40px;min-width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:#1c1f26;color:var(--txt);
+  font-size:17px;font-family:inherit;touch-action:manipulation;padding:0}
+#nav button.cur{border-color:var(--acc);background:#262a33}
+#scroll{flex:1;position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 16px 120px}
+.jwrap{border:1px solid var(--line);border-radius:14px;padding:4px 10px 10px;background:#111317;margin-top:12px}
+.jwrap.glav{border-color:var(--acc)}
+.jwrap h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:10px 2px 6px}
+.jgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.jb{display:block;width:100%;text-align:left;border:0;border-radius:10px;background:var(--plate);color:var(--txt);padding:8px 10px;min-height:58px;
+  font-family:inherit;touch-action:manipulation;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden}
+.jb b{display:block;font-size:14px;line-height:1.25;padding-right:26px}
+.jb small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;color:var(--dim);overflow:hidden;margin-top:3px}
+.jb .vb{position:absolute;right:7px;top:6px;font-size:10px;color:var(--open);font-weight:700}
+.jb .fx{position:absolute;right:7px;top:6px;font-size:10px;color:#fff;background:var(--en);border-radius:4px;padding:0 4px;font-weight:700}
+.jb .fx.de{background:#555}
+.bar{position:absolute;left:0;bottom:0;height:4px;width:0;background:#fff;opacity:.85}
+.playing{background:var(--acc)!important;color:#fff!important}
+.playing small,.playing .vb{color:#fff!important}
+.jb.done:not(.playing){opacity:.62}
+#stop{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:5;display:none;border:0;border-radius:14px;
+  background:#c62828;color:#fff;font-weight:700;font-size:18px;line-height:1.2;font-family:inherit;padding:14px 12px;box-shadow:0 6px 24px #000a;touch-action:manipulation}
+#stop small{display:block;font-weight:500;font-size:12px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#banner{display:none;background:var(--bad);color:#fff;font-weight:700;padding:8px 16px;font-size:14px}
+.foot{margin:28px 0 0;color:var(--faint);font-size:12px;text-align:center}
+.foot button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:8px 14px;font-family:inherit;margin-bottom:8px}
+@media (min-width:700px){ #scroll,header{padding-left:max(16px,calc(50% - 340px));padding-right:max(16px,calc(50% - 340px))} .jgrid{grid-template-columns:1fr 1fr 1fr} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="hrow">
+      <div><span class="ttl">📴 Без облака</span> <span class="ver" id="ver"></span></div>
+      <button id="mem" type="button">загружаю…</button>
+    </div>
+    <div class="hrow2">
+      <button id="lang" type="button">🇩🇪 DE</button>
+      <nav id="nav"></nav>
+    </div>
+  </header>
+  <div id="banner"></div>
+  <main id="scroll"></main>
+</div>
+<button id="stop" type="button">⏹ СТОП<small id="stopTx"></small></button>
+<script>/*FRAZY_START*/window.FRAZY = {"title": "Робот · без облака", "version": "18.11.2026 Без облака · 1", "groups": [{"id": "glav", "nav": "🆘", "ru": "Главное", "povtor_vnizu": true, "items": [{"id": "hallo", "ru": "Привет", "v": [{"de": {"t": "[warm] Hallo und herzlich willkommen! Schön, dass Sie da sind.", "f": "audio/de/hallo-1.mp3", "h": "ab30f870", "d": 3.7}, "en": {"t": "[warm] Hello and welcome! Great to have you here.", "f": "audio/en/hallo-1.mp3", "h": "c69e2312", "d": 3.5}}, {"de": {"t": "[cheerfully] Guten Tag! Ich bin ein KI-Roboter — und heute ganz für Sie da.", "f": "audio/de/hallo-2.mp3", "h": "3fdde03a", "d": 4.8}, "en": {"t": "[cheerfully] Good day! I'm an AI robot — and today I'm all yours.", "f": "audio/en/hallo-2.mp3", "h": "ae86d766", "d": 4.7}}, {"de": {"t": "[cheerfully] Hallo! Kommen Sie ruhig näher — ich beiße nicht.", "f": "audio/de/hallo-3.mp3", "h": "72313d21", "d": 3.8}, "en": {"t": "[cheerfully] Hi there! Come on closer — I don't bite.", "f": "audio/en/hallo-3.mp3", "h": "01b2032b", "d": 4.1}}]}, {"id": "hoere", "ru": "Слышишь меня? — Да", "v": [{"de": {"t": "[cheerfully] Ja, ich höre Sie! Fragen Sie mich ruhig etwas.", "f": "audio/de/hoere-1.mp3", "h": "41f5c351", "d": 3.3}, "en": {"t": "[cheerfully] Yes, I can hear you! Go ahead, ask me something.", "f": "audio/en/hoere-1.mp3", "h": "b865bf2b", "d": 3.5}}]}, {"id": "laut", "ru": "Не расслышал (1→2→3)", "v": [{"de": {"t": "Pardon, hier ist es gerade etwas laut. Kommen Sie ruhig einen Schritt näher und sagen Sie es bitte noch einmal.", "f": "audio/de/laut-1.mp3", "h": "838cfebb", "d": 5.4}, "en": {"t": "Sorry, it's a bit loud in here. Please step a little closer and say that again.", "f": "audio/en/laut-1.mp3", "h": "3800c9f2", "d": 4.6}}, {"de": {"t": "Entschuldigung, das ist bei mir nicht ganz angekommen. Noch einmal, bitte — ein bisschen lauter?", "f": "audio/de/laut-2.mp3", "h": "caa8d18c", "d": 5.4}, "en": {"t": "Sorry, I didn't quite catch that. Once more, please — a little louder?", "f": "audio/en/laut-2.mp3", "h": "6b2484ce", "d": 4.4}}, {"de": {"t": "Es ist wirklich laut hier. Meine Kolleginnen und Kollegen helfen Ihnen gern weiter.", "f": "audio/de/laut-3.mp3", "h": "950bfab9", "d": 5.0}, "en": {"t": "It really is loud in here. My colleagues will be happy to help you.", "f": "audio/en/laut-3.mp3", "h": "d5edd095", "d": 5.5}}]}, {"id": "moment", "ru": "Секунду…", "v": [{"de": {"t": "Einen kleinen Moment, bitte.", "f": "audio/de/moment-1.mp3", "h": "809f4237", "d": 1.6}, "en": {"t": "Just a moment, please.", "f": "audio/en/moment-1.mp3", "h": "adb566c9", "d": 1.6}}, {"de": {"t": "Hmm — gute Frage. Einen Moment.", "f": "audio/de/moment-2.mp3", "h": "8b044909", "d": 3.3}, "en": {"t": "Hmm — good question. One moment.", "f": "audio/en/moment-2.mp3", "h": "b7f6c96a", "d": 3.2}}]}, {"id": "kollege", "ru": "Это — к коллегам", "v": [{"de": {"t": "Das weiß ich leider nicht — aber meine Kolleginnen und Kollegen hier können das genau beantworten.", "f": "audio/de/kollege-1.mp3", "h": "43e93d09", "d": 5.4}, "en": {"t": "I'm afraid I don't know that — but my colleagues here can answer it precisely.", "f": "audio/en/kollege-1.mp3", "h": "72ed5b02", "d": 4.5}}, {"de": {"t": "Gute Frage! Da fragen Sie am besten meine Kolleginnen und Kollegen — die wissen das ganz genau.", "f": "audio/de/kollege-2.mp3", "h": "d567e6ff", "d": 5.9}, "en": {"t": "Good question! Best ask my colleagues — they know exactly.", "f": "audio/en/kollege-2.mp3", "h": "e11e46f1", "d": 4.6}}]}, {"id": "danke", "ru": "Спасибо / на комплимент", "v": [{"de": {"t": "[warm] Vielen Dank — das freut mich sehr!", "f": "audio/de/danke-1.mp3", "h": "08a58886", "d": 2.6}, "en": {"t": "[warm] Thank you so much — that makes me happy!", "f": "audio/en/danke-1.mp3", "h": "f262bc18", "d": 3.2}}, {"de": {"t": "[laughs] Danke! Ich werde ganz rot — na ja, wenn ich könnte.", "f": "audio/de/danke-2.mp3", "h": "3b286c76", "d": 5.2}, "en": {"t": "[laughs] Thanks! I'm blushing — well, I would if I could.", "f": "audio/en/danke-2.mp3", "h": "9f570c70", "d": 5.5}}]}, {"id": "ja", "ru": "Да / согласен / смех", "v": [{"de": {"t": "Ganz genau.", "f": "audio/de/ja-1.mp3", "h": "b5ffffb5", "d": 1.9}, "en": {"t": "Exactly.", "f": "audio/en/ja-1.mp3", "h": "65766c6b", "d": 1.3}}, {"de": {"t": "Da haben Sie völlig recht.", "f": "audio/de/ja-2.mp3", "h": "3c9f4169", "d": 1.7}, "en": {"t": "You're absolutely right.", "f": "audio/en/ja-2.mp3", "h": "0ba5c4a6", "d": 1.8}}, {"de": {"t": "[laughs] Der war gut!", "f": "audio/de/ja-3.mp3", "h": "1561ce46", "d": 2.2}, "en": {"t": "[laughs] Good one!", "f": "audio/en/ja-3.mp3", "h": "b59269c1", "d": 2.1}}]}, {"id": "foto", "ru": "Фото", "v": [{"de": {"t": "[cheerfully] Ein Foto mit mir? Sehr gern — ich halte still.", "f": "audio/de/foto-1.mp3", "h": "b769583c", "d": 3.7}, "en": {"t": "[cheerfully] A photo with me? Gladly — I'll hold still.", "f": "audio/en/foto-1.mp3", "h": "056e88ff", "d": 3.6}}, {"de": {"t": "[cheerfully] Sehr gern! Ich stelle mich in Pose — bitte recht freundlich.", "f": "audio/de/foto-2.mp3", "h": "cf807056", "d": 4.9}, "en": {"t": "[cheerfully] Gladly! I'll strike a pose — big smiles, please.", "f": "audio/en/foto-2.mp3", "h": "2702beaf", "d": 4.3}}]}, {"id": "bye", "ru": "Пока", "v": [{"de": {"t": "[warm] Danke für das Gespräch! Einen schönen Tag noch.", "f": "audio/de/bye-1.mp3", "h": "66272123", "d": 3.5}, "en": {"t": "[warm] Thanks for the chat! Have a great day.", "f": "audio/en/bye-1.mp3", "h": "09eb8841", "d": 2.5}}, {"de": {"t": "Schön, dass Sie da waren! Bis bald!", "f": "audio/de/bye-2.mp3", "h": "8c144249", "d": 2.7}, "en": {"t": "Great that you stopped by! See you soon!", "f": "audio/en/bye-2.mp3", "h": "20bbcb8a", "d": 3.2}}, {"de": {"t": "[cheerfully] Tschüss — und erzählen Sie allen, dass Sie einen Roboter getroffen haben!", "f": "audio/de/bye-3.mp3", "h": "c348560a", "d": 4.1}, "en": {"t": "[cheerfully] Bye — and tell everyone you met a robot!", "f": "audio/en/bye-3.mp3", "h": "c890bcdf", "d": 3.1}}]}, {"id": "pauza", "ru": "Пауза — батарея", "v": [{"de": {"t": "Ich lade kurz meine Batterien auf. In ein paar Minuten bin ich wieder ganz für Sie da.", "f": "audio/de/pauza-1.mp3", "h": "65a780d9", "d": 4.4}, "en": {"t": "I'm quickly recharging my batteries. In a few minutes I'm all yours again.", "f": "audio/en/pauza-1.mp3", "h": "5434ea27", "d": 4.5}}]}]}, {"id": "robot", "nav": "🤖", "ru": "Про робота", "povtor_vnizu": false, "items": [{"id": "wer", "ru": "Кто ты? Как зовут?", "v": [{"de": {"t": "[warm] Ich bin ein humanoider Roboter mit künstlicher Intelligenz — und heute Ihr Gesprächspartner.", "f": "audio/de/wer-1.mp3", "h": "613a14e6", "d": 5.6}, "en": {"t": "[warm] I'm a humanoid robot with artificial intelligence — and today I'm here to talk with you.", "f": "audio/en/wer-1.mp3", "h": "48162f2f", "d": 4.6}}]}, {"id": "ki", "ru": "Ты ИИ? Кто управляет?", "v": [{"de": {"t": "Ja, ich bin ein KI-Roboter. Im Hintergrund hilft mir ein Team — wie bei jedem guten Gastgeber.", "f": "audio/de/ki-1.mp3", "h": "34ecd0f4", "d": 7.0}, "en": {"t": "Yes, I'm an AI robot. A team helps me in the background — like every good host has.", "f": "audio/en/ki-1.mp3", "h": "838a5db3", "d": 6.1}}]}, {"id": "mensch", "ru": "Внутри человек?", "v": [{"de": {"t": "[laughs] Nein, da drin sitzt niemand — ich bin ein echter Roboter. Aber ein Team im Hintergrund passt auf mich auf.", "f": "audio/de/mensch-1.mp3", "h": "7bef172e", "d": 8.2}, "en": {"t": "[laughs] No, there's nobody inside — I'm a real robot. But a team in the background keeps an eye on me.", "f": "audio/en/mensch-1.mp3", "h": "24e18de5", "d": 7.2}}]}, {"id": "gebaut", "ru": "Кто тебя привёз?", "v": [{"de": {"t": "Mein Team von Robotollern hat mich hergebracht.", "f": "audio/de/gebaut-1.mp3", "h": "95ff84f8", "d": 2.7}, "en": {"t": "My team from Robotollern brought me here.", "f": "audio/en/gebaut-1.mp3", "h": "47691915", "d": 2.5}}]}, {"id": "kann", "ru": "Что ты умеешь?", "v": [{"de": {"t": "Ich begrüße Gäste, beantworte Fragen und posiere für Fotos. Und manchmal tanze ich sogar.", "f": "audio/de/kann-1.mp3", "h": "d7ad9435", "d": 6.1}, "en": {"t": "I welcome guests, answer questions and pose for photos. And sometimes I even dance.", "f": "audio/en/kann-1.mp3", "h": "9c2540f8", "d": 6.3}}]}, {"id": "tanz", "ru": "Танец (включи в приложении)", "v": [{"de": {"t": "[cheerfully] Ein kleines Tänzchen? Na gut — schauen Sie mal!", "f": "audio/de/tanz-1.mp3", "h": "2b90b1bc", "d": 4.4}, "en": {"t": "[cheerfully] A little dance? All right — watch this!", "f": "audio/en/tanz-1.mp3", "h": "d5a90270", "d": 3.4}}]}, {"id": "hand", "ru": "Дай пять / руку", "v": [{"de": {"t": "Ein High Five? Gern — aber ganz sanft, bitte.", "f": "audio/de/hand-1.mp3", "h": "80dfd492", "d": 3.9}, "en": {"t": "A high five? Sure — but gently, please.", "f": "audio/en/hand-1.mp3", "h": "b28882c3", "d": 3.6}}]}, {"id": "kaffee", "ru": "Кофе, еда, пиво", "v": [{"de": {"t": "[laughs] Ich trinke nur Strom — Kaffee wäre schlecht für meine Gelenke.", "f": "audio/de/kaffee-1.mp3", "h": "b9447d5f", "d": 4.6}, "en": {"t": "[laughs] I only drink electricity — coffee would be bad for my joints.", "f": "audio/en/kaffee-1.mp3", "h": "befe84b1", "d": 5.5}}, {"de": {"t": "[laughs] Ein Bier? Lieber nicht — sonst wackle ich noch mehr als sonst.", "f": "audio/de/kaffee-2.mp3", "h": "23fd9405", "d": 5.5}, "en": {"t": "[laughs] A beer? Better not — I'd wobble even more than usual.", "f": "audio/en/kaffee-2.mp3", "h": "343848f3", "d": 4.9}}]}, {"id": "alter", "ru": "Сколько тебе лет?", "v": [{"de": {"t": "[laughs] Ich bin noch ziemlich jung — aber ich lerne jeden Tag dazu.", "f": "audio/de/alter-1.mp3", "h": "93d7cf52", "d": 4.6}, "en": {"t": "[laughs] I'm still pretty young — but I learn something new every day.", "f": "audio/en/alter-1.mp3", "h": "42842f36", "d": 5.0}}]}, {"id": "gefuehle", "ru": "Чувства? Страшно?", "v": [{"de": {"t": "Gefühle wie Sie habe ich nicht. Aber wenn Sie lachen, ist das für mich der beste Moment des Tages.", "f": "audio/de/gefuehle-1.mp3", "h": "e5124e11", "d": 5.8}, "en": {"t": "I don't have feelings like you do. But when you laugh, that's the best moment of my day.", "f": "audio/en/gefuehle-1.mp3", "h": "9d402a70", "d": 6.1}}]}, {"id": "jobangst", "ru": "Роботы заберут работу?", "v": [{"de": {"t": "Keine Sorge — ich nehme niemandem die Arbeit weg. Ich bin eher fürs Begrüßen und für Fotos zuständig.", "f": "audio/de/jobangst-1.mp3", "h": "d511a072", "d": 6.7}, "en": {"t": "Don't worry — I'm not taking anyone's job. I'm more in charge of greetings and photos.", "f": "audio/en/jobangst-1.mp3", "h": "72df523f", "d": 6.2}}]}, {"id": "mieten", "ru": "Арендовать? Сколько стоишь?", "v": [{"de": {"t": "Das verrät Ihnen gern mein Team — fragen Sie einfach meine Kolleginnen und Kollegen.", "f": "audio/de/mieten-1.mp3", "h": "725323c0", "d": 4.4}, "en": {"t": "My team will gladly tell you — just ask my colleagues.", "f": "audio/en/mieten-1.mp3", "h": "9276d7b9", "d": 3.5}}]}, {"id": "gefallen", "ru": "Как тебе здесь?", "v": [{"de": {"t": "[cheerfully] Mir gefällt es hier sehr — so viele interessante Menschen auf einmal!", "f": "audio/de/gefallen-1.mp3", "h": "4c041dbe", "d": 4.7}, "en": {"t": "[cheerfully] I really like it here — so many interesting people at once!", "f": "audio/en/gefallen-1.mp3", "h": "872bf89b", "d": 4.4}}]}, {"id": "englisch", "ru": "Говоришь по-английски? — Да", "v": [{"en": {"t": "[cheerfully] Yes, of course — I speak English too!", "f": "audio/en/englisch-1.mp3", "h": "1e50d0ec", "d": 3.1}}]}, {"id": "deutsch", "ru": "Обратно на немецкий", "v": [{"de": {"t": "[cheerfully] Gern machen wir auf Deutsch weiter!", "f": "audio/de/deutsch-1.mp3", "h": "c97270a7", "d": 2.1}}]}]}, {"id": "podkol", "nav": "😄", "ru": "Подколы и шутки", "povtor_vnizu": false, "items": [{"id": "politik", "ru": "Политика", "v": [{"de": {"t": "Politik überlasse ich den Menschen. Ich bin nur ein Roboter — ich halte mich an Fakten und gute Laune.", "f": "audio/de/politik-1.mp3", "h": "592a5c7a", "d": 7.0}, "en": {"t": "I leave politics to humans. I'm just a robot — I stick to facts and good vibes.", "f": "audio/en/politik-1.mp3", "h": "2d8ee0f8", "d": 5.7}}]}, {"id": "frech", "ru": "Грубость (↻)", "v": [{"de": {"t": "[laughs] Autsch! Zum Glück bin ich aus Metall.", "f": "audio/de/frech-1.mp3", "h": "9a1c98f8", "d": 3.7}, "en": {"t": "[laughs] Ouch! Luckily I'm made of metal.", "f": "audio/en/frech-1.mp3", "h": "358977ea", "d": 3.9}}, {"de": {"t": "Vielleicht — aber dafür bin ich nie müde und immer freundlich.", "f": "audio/de/frech-2.mp3", "h": "95adcc29", "d": 4.6}, "en": {"t": "Maybe — but at least I'm never tired and always friendly.", "f": "audio/en/frech-2.mp3", "h": "f5b54f8e", "d": 4.6}}]}, {"id": "witz", "ru": "Шутка (↻)", "v": [{"de": {"t": "Wissen Sie, warum Roboter nie in Panik geraten? Wir haben Nerven aus Stahl.", "f": "audio/de/witz-1.mp3", "h": "ca0b6eb5", "d": 5.1}, "en": {"t": "Do you know why robots never panic? We have nerves of steel.", "f": "audio/en/witz-1.mp3", "h": "8de9bb0e", "d": 4.8}}, {"de": {"t": "Mein Arzt sagt, ich soll weniger Strom trinken. Aber ohne Strom bin ich einfach nicht ich selbst.", "f": "audio/de/witz-2.mp3", "h": "f9a03603", "d": 6.3}, "en": {"t": "My doctor says I should drink less electricity. But without it, I'm just not myself.", "f": "audio/en/witz-2.mp3", "h": "52134a20", "d": 5.4}}, {"de": {"t": "Ich wollte einen Witz über WLAN erzählen — aber er kam nicht an.", "f": "audio/de/witz-3.mp3", "h": "c9c58085", "d": 4.2}, "en": {"t": "I tried to tell a joke about Wi-Fi — but it didn't connect.", "f": "audio/en/witz-3.mp3", "h": "9aec38e9", "d": 4.2}}]}, {"id": "privat", "ru": "Личное, интим", "v": [{"de": {"t": "[laughs] Dazu sage ich nichts — ich bin ein Roboter mit Manieren.", "f": "audio/de/privat-1.mp3", "h": "8d4805b6", "d": 4.2}, "en": {"t": "[laughs] No comment — I'm a robot with manners.", "f": "audio/en/privat-1.mp3", "h": "24fdb2dc", "d": 3.9}}]}, {"id": "geheim", "ru": "Какая модель? Секреты", "v": [{"de": {"t": "Was in mir steckt, bleibt mein kleines Geheimnis.", "f": "audio/de/geheim-1.mp3", "h": "63f46ed7", "d": 3.4}, "en": {"t": "What's inside me stays my little secret.", "f": "audio/en/geheim-1.mp3", "h": "fc79cc43", "d": 3.2}}]}, {"id": "vorsicht", "ru": "Не толкай! Осторожно", "v": [{"de": {"t": "Vorsicht, bitte — ich bin zwar aus Metall, aber ein bisschen empfindlich.", "f": "audio/de/vorsicht-1.mp3", "h": "a8c64b90", "d": 4.4}, "en": {"t": "Careful, please — I'm made of metal, but a little sensitive.", "f": "audio/en/vorsicht-1.mp3", "h": "b39c3b84", "d": 3.9}}]}]}, {"id": "reak", "nav": "💬", "ru": "Гость ответил → реакция", "povtor_vnizu": false, "items": [{"id": "spannend", "ru": "Интересно! (↻)", "v": [{"de": {"t": "[curious] Spannend! Das klingt wirklich interessant.", "f": "audio/de/spannend-1.mp3", "h": "55768518", "d": 3.6}, "en": {"t": "[curious] Exciting! That sounds really interesting.", "f": "audio/en/spannend-1.mp3", "h": "dc376489", "d": 3.1}}, {"de": {"t": "Oh, das höre ich heute zum ersten Mal!", "f": "audio/de/spannend-2.mp3", "h": "252e7a33", "d": 2.9}, "en": {"t": "Oh, that's the first time I've heard that today!", "f": "audio/en/spannend-2.mp3", "h": "36b64b65", "d": 3.0}}, {"de": {"t": "[warm] Toll! Darüber sprechen meine Kolleginnen und Kollegen bestimmt gern mit Ihnen.", "f": "audio/de/spannend-3.mp3", "h": "d4ff3203", "d": 4.8}, "en": {"t": "[warm] Great! I'm sure my colleagues would love to talk with you about that.", "f": "audio/en/spannend-3.mp3", "h": "2f678487", "d": 4.1}}]}, {"id": "wow", "ru": "Вау / круто", "v": [{"de": {"t": "[laughs] Wow! Das muss ich mir merken.", "f": "audio/de/wow-1.mp3", "h": "9e36b297", "d": 3.3}, "en": {"t": "[laughs] Wow! I need to remember that.", "f": "audio/en/wow-1.mp3", "h": "9c7c78ad", "d": 3.0}}]}]}, {"id": "zov", "nav": "📣", "ru": "Зазывать и шоу", "povtor_vnizu": false, "items": [{"id": "naeher", "ru": "Подходите ближе (↻)", "v": [{"de": {"t": "[cheerfully] Kommen Sie ruhig näher — ich beiße nicht!", "f": "audio/de/naeher-1.mp3", "h": "47de0595", "d": 2.5}, "en": {"t": "[cheerfully] Come on closer — I don't bite!", "f": "audio/en/naeher-1.mp3", "h": "4f736d59", "d": 2.8}}, {"de": {"t": "Ein Foto mit einem echten Roboter? Kommen Sie her!", "f": "audio/de/naeher-2.mp3", "h": "959e0bf0", "d": 4.3}, "en": {"t": "A photo with a real robot? Come on over!", "f": "audio/en/naeher-2.mp3", "h": "0af6f945", "d": 3.4}}, {"de": {"t": "Hallo, Sie da! Haben Sie kurz Zeit für einen Roboter?", "f": "audio/de/naeher-3.mp3", "h": "a728349a", "d": 3.5}, "en": {"t": "Hello there! Got a minute for a robot?", "f": "audio/en/naeher-3.mp3", "h": "40c93733", "d": 2.7}}]}, {"id": "applaus", "ru": "Аплодисменты!", "v": [{"de": {"t": "[cheerfully] Einen großen Applaus, bitte!", "f": "audio/de/applaus-1.mp3", "h": "269d538b", "d": 2.6}, "en": {"t": "[cheerfully] A big round of applause, please!", "f": "audio/en/applaus-1.mp3", "h": "a918f8fe", "d": 2.4}}]}, {"id": "kamera", "ru": "Привет в камеру", "v": [{"de": {"t": "[cheerfully] Hallo an alle, die das gerade sehen!", "f": "audio/de/kamera-1.mp3", "h": "ec521933", "d": 2.5}, "en": {"t": "[cheerfully] Hello to everyone watching!", "f": "audio/en/kamera-1.mp3", "h": "c7851320", "d": 2.7}}]}]}, {"id": "tech", "nav": "🔧", "ru": "Техника, сбой", "povtor_vnizu": false, "items": [{"id": "aussetzer", "ru": "После сбоя: я снова тут", "v": [{"de": {"t": "Entschuldigung, ich hatte gerade einen kleinen Aussetzer. Jetzt bin ich wieder da!", "f": "audio/de/aussetzer-1.mp3", "h": "be67bf12", "d": 4.8}, "en": {"t": "Sorry, I just had a little glitch. Now I'm back!", "f": "audio/en/aussetzer-1.mp3", "h": "201858ae", "d": 3.1}}]}, {"id": "denken", "ru": "Подвис / думаю", "v": [{"de": {"t": "Einen Moment — ich sortiere kurz meine Schaltkreise.", "f": "audio/de/denken-1.mp3", "h": "f8a5de83", "d": 3.1}, "en": {"t": "One moment — I'm just sorting out my circuits.", "f": "audio/en/denken-1.mp3", "h": "1e520e71", "d": 2.8}}]}, {"id": "cloud", "ru": "Нет связи с облаком", "v": [{"de": {"t": "Meine Verbindung zur Cloud macht gerade Pause — aber meine Lieblingssätze habe ich immer dabei.", "f": "audio/de/cloud-1.mp3", "h": "b3ee3213", "d": 5.6}, "en": {"t": "My cloud connection is taking a break — but I always carry my favourite lines with me.", "f": "audio/en/cloud-1.mp3", "h": "92c56378", "d": 5.0}}]}, {"id": "weiter", "ru": "Ухожу дальше", "v": [{"de": {"t": "Ich muss kurz weiter — bis später!", "f": "audio/de/weiter-1.mp3", "h": "6f3da8b3", "d": 2.2}, "en": {"t": "I have to move on — see you later!", "f": "audio/en/weiter-1.mp3", "h": "095355ee", "d": 2.4}}]}]}]};/*FRAZY_END*/</script>   <!-- фразы вшиты в страницу (offline_pult.py вписывает сам): пульт рисуется без запросов в сеть -->
+<script>
+const VERSION = '18.11.2026 Без облака · 1';
+const PROIGRYVATEL = true;   // пульт-проигрыватель: только записи, без мозга — proverit_pult.py проверяет его по-своему
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const bezTegov = t => String(t ?? '').replace(/\[[^\]]*\]\s*/g, '');
+$('ver').textContent = 'v'+VERSION.split('· ').pop();
+
+let F = null, ITEMS = {}, ALL = [];
+let LANG = 'de';                                  // язык НЕ запоминается: каждый раз пульт открывается на немецком
+const player = new Audio();
+player.preload = 'auto';
+let cur = null, curClip = null, curEls = [], curT = 0, raf = 0;
+
+function banner(t){ const b=$('banner'); b.textContent=t||''; b.style.display=t?'block':'none'; }
+
+// ---- какой вариант и на каком языке сыграет кнопка ----
+function klip(it){
+  const v = it.v[it.idx % it.v.length];
+  return v[LANG] || v.de || v.en;                 // фраза только на одном языке (например «да, говорю по-английски») играет всегда его
+}
+function els(id){ return [...document.querySelectorAll('[data-id="'+id+'"]')]; }
+function podpis(it){                              // обновить текст под кнопкой (что сыграет при следующем нажатии)
+  const k = klip(it);
+  els(it.id).forEach(e=>{
+    e.querySelector('small').textContent = bezTegov(k.t);
+    const vb = e.querySelector('.vb'); if(vb) vb.textContent = '↻ '+((it.idx % it.v.length)+1)+'/'+it.v.length;
+  });
+}
+
+// ---- воспроизведение: одна запись за раз ----
+function stop(){
+  try{ player.pause(); }catch{}
+  curEls.forEach(e=>{ e.classList.remove('playing'); const b=e.querySelector('.bar'); if(b) b.style.width='0'; });
+  cur=null; curClip=null; curEls=[]; cancelAnimationFrame(raf); $('stop').style.display='none';
+}
+function tick(){
+  if(!cur) return;
+  const d = player.duration || curClip.d || 1, w = Math.min(100, (player.currentTime/d)*100) + '%';
+  curEls.forEach(e=>{ const b=e.querySelector('.bar'); if(b) b.style.width=w; });
+  raf = requestAnimationFrame(tick);
+}
+function play(it){
+  if(cur === it){ if(performance.now()-curT < 1200) return; stop(); return; }   // дрогнул палец — не перезапускать; ещё раз — стоп
+  stop();
+  const k = klip(it);
+  cur = it; curClip = k; curT = performance.now(); curEls = els(it.id);
+  curEls.forEach(e=>e.classList.add('playing','done'));
+  $('stopTx').textContent = bezTegov(k.t);
+  $('stop').style.display = 'block';
+  player.src = k.blob || (k.f + '?h=' + (k.h||''));
+  const me = it;
+  player.play().then(()=>{ if(cur===me) tick(); banner(''); }).catch(e=>{
+    if(cur!==me || e?.name==='AbortError') return;
+    stop(); banner('⚠️ Запись не сыграла: «' + bezTegov(k.t).slice(0,40) + '…» — нажми ещё раз');
+  });
+  if(it.v.length > 1){ it.idx = (it.idx + 1) % it.v.length; setTimeout(()=>podpis(it), 50); }   // следующее нажатие — следующий вариант
+  keepAwake();
+}
+player.onended = () => stop();
+player.onerror = () => { if(cur){ const t=bezTegov(curClip.t); stop(); banner('⚠️ Запись не сыграла: «'+t.slice(0,40)+'…» — нажми ещё раз'); } };
+$('stop').onclick = stop;
+
+// ---- язык: одна кнопка на весь пульт ----
+function setLang(l){
+  LANG = l; const b=$('lang');
+  b.textContent = l==='en' ? '🇬🇧 EN' : '🇩🇪 DE'; b.classList.toggle('en', l==='en');
+  Object.values(ITEMS).forEach(podpis);
+}
+$('lang').onclick = () => setLang(LANG==='de' ? 'en' : 'de');
+
+// ---- отрисовка ----
+function knopka(it){
+  const b=document.createElement('button'); b.type='button'; b.className='jb'; b.dataset.id=it.id;
+  const odin = it.v.every(v=>!(v.de && v.en)) ? (it.v[0].en ? 'en' : 'de') : '';
+  const metka = it.v.length>1 ? '<span class="vb"></span>' : (odin ? '<span class="fx '+odin+'">'+odin.toUpperCase()+'</span>' : '');
+  b.innerHTML='<b>'+esc(it.ru)+'</b>'+metka+'<small></small><span class="bar"></span>';
+  b.onclick=()=>play(it);
+  return b;
+}
+function gruppa(g, kopiya){
+  const w=document.createElement('div'); w.className='jwrap'+(g.povtor_vnizu?' glav':''); w.id='g-'+g.id+(kopiya?'-niz':'');
+  const h=document.createElement('h2'); h.textContent=g.nav+' '+g.ru; w.appendChild(h);
+  const grid=document.createElement('div'); grid.className='jgrid';
+  g.items.forEach(it=>grid.appendChild(knopka(ITEMS[it.id])));
+  w.appendChild(grid);
+  return w;
+}
+function render(){
+  const m=$('scroll'); m.innerHTML='';
+  F.groups.forEach(g=>m.appendChild(gruppa(g)));
+  F.groups.filter(g=>g.povtor_vnizu).forEach(g=>m.appendChild(gruppa(g, true)));   // главное — ещё раз внизу, как джокеры у Robby
+  const f=document.createElement('div'); f.className='foot';
+  f.innerHTML='<button type="button" id="reset">↺ снять отметки (новый гость)</button><br>'+esc(VERSION)+' · '+ALL.length+' записей · без облака: ни мозга, ни микрофона';
+  m.appendChild(f);
+  $('reset').onclick=()=>{ document.querySelectorAll('.done').forEach(e=>e.classList.remove('done')); };
+  Object.values(ITEMS).forEach(podpis);
+  const nav=$('nav'); nav.innerHTML='';
+  const go=id=>{ const t=$(id), sc=$('scroll'); if(t){ sc.scrollTop = t.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 6; navCur(); } };
+  F.groups.forEach(g=>{ const b=document.createElement('button'); b.type='button'; b.textContent=g.nav; b.title=g.ru; b.dataset.to='g-'+g.id; b.onclick=()=>go('g-'+g.id); nav.appendChild(b); });
+}
+function navCur(){
+  const sc=$('scroll'), y=sc.scrollTop+60; let curId='g-'+F.groups[0].id;
+  F.groups.forEach(g=>{ const e=$('g-'+g.id); if(e && e.offsetTop<=y) curId='g-'+g.id; });
+  if(sc.scrollTop+sc.clientHeight>=sc.scrollHeight-4) curId='g-'+F.groups[0].id;   // внизу — повтор «главного»
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('cur',b.dataset.to===curId));
+}
+
+// ---- все записи — в память телефона (дальше сеть не нужна) ----
+const KESH='offline-pult-v1';
+let kesh=null;
+async function otkrytKesh(){ try{ kesh = await caches.open(KESH); }catch{ kesh=null; } }
+function sTaimautom(url, ms, opt={}){ const ac=new AbortController(); const t=setTimeout(()=>ac.abort(), ms);
+  return fetch(url,{...opt, signal:ac.signal}).finally(()=>clearTimeout(t)); }
+async function zagruzit(k){
+  const url = new URL(k.f+'?h='+(k.h||''), location.href).href;
+  let r=null;
+  try{ r = kesh ? await kesh.match(url) : null; }catch{ r=null; }
+  if(!r){ r = await sTaimautom(url, 20000); if(!r.ok) throw new Error(r.status); try{ if(kesh) await kesh.put(url, r.clone()); }catch{} }
+  k.blob = URL.createObjectURL(await r.blob());
+}
+async function stranicuVPamyat(){ try{ if(!kesh) return; const r=await sTaimautom('./', 20000, {cache:'no-store'});
+  if(r.ok) await kesh.put(new URL('./', location.href).href, r); }catch{} }
+let memOk=0, memBad=0;
+function memShow(){ const m=$('mem');
+  m.className = memBad ? 'bad' : (memOk===ALL.length ? 'ok' : '');
+  m.textContent = memBad ? '⚠️ '+memBad+' не скачались — нажми' : (memOk===ALL.length ? '🎧 все '+ALL.length+' в памяти' : '🎧 '+memOk+' из '+ALL.length+'…'); }
+function vPamyat(){
+  const todo=ALL.filter(k=>!k.blob && !k._idet);
+  memBad=0; memOk=ALL.filter(k=>k.blob).length; memShow();
+  todo.forEach(k=>{ k._idet=true;
+    zagruzit(k).then(()=>{ memOk++; }).catch(()=>{ memBad++; }).finally(()=>{ k._idet=false; memShow(); });
+  });
+}
+$('mem').onclick=()=>vPamyat();
+window.addEventListener('online',()=>{ if(ALL.some(k=>!k.blob)) vPamyat(); });
+
+// ---- экран не гаснет ----
+let wakeLock=null;
+async function keepAwake(){ if(wakeLock) return; try{ wakeLock=await navigator.wakeLock?.request('screen'); wakeLock?.addEventListener?.('release',()=>{ wakeLock=null; }); }catch{} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') keepAwake(); });
+
+(async()=>{
+  F = window.FRAZY;
+  if(!F || !F.groups){ banner('⚠️ Фразы не вшиты в страницу — запусти python3 scripts/offline_pult.py и выложи заново'); return; }
+  F.groups.forEach(g=>g.items.forEach(it=>{ it.idx=0; ITEMS[it.id]=it; it.v.forEach(v=>['de','en'].forEach(l=>{ if(v[l]) ALL.push(v[l]); })); }));
+  render(); setLang('de'); keepAwake();
+  $('scroll').addEventListener('scroll',navCur,{passive:true}); navCur();
+  await otkrytKesh(); vPamyat(); stranicuVPamyat();
+  try{ if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch{}
+  window.__offline = { ITEMS, ALL, play, stop, setLang, state:()=>({cur:cur?cur.id:null, klip:curClip?curClip.f:null, paused:player.paused, lang:LANG, mem:ALL.filter(k=>k.blob).length}) };
+})();
+</script>
+</body>
+</html>

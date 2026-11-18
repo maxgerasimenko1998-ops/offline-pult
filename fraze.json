@@ -1,0 +1,536 @@
+{
+ "title": "Робот · без облака",
+ "short": "Без облака",
+ "version": "18.11.2026 Без облака · 1",
+ "color": "#e0b040",
+ "kesh": "offline-pult",
+ "voice": "aTTiK3YzK3dXETpuDE2h",
+ "model": "eleven_v3_conversational",
+ "stab": 0.5,
+ "speed": 1.05,
+ "pauza": 0.3,
+ "_kak": "УНИВЕРСАЛЬНЫЙ: без имени робота и без заказчика — подходит любому. Голос Ben. Для нового робота: скопировать папку, поменять title/short/version/color/kesh/voice (+ свои фразы) → python3 scripts/offline_pult.py <папка> --scribe → выложить. Фразы выбраны по 1216 разговорам ElevenLabs (18.11): что гости спрашивают чаще всего.",
+ "groups": [
+  {
+   "id": "glav",
+   "nav": "🆘",
+   "ru": "Главное",
+   "povtor_vnizu": true,
+   "items": [
+    {
+     "id": "hallo",
+     "ru": "Привет",
+     "v": [
+      {
+       "de": "[warm] Hallo und herzlich willkommen! Schön, dass Sie da sind.",
+       "en": "[warm] Hello and welcome! Great to have you here."
+      },
+      {
+       "de": "[cheerfully] Guten Tag! Ich bin ein KI-Roboter — und heute ganz für Sie da.",
+       "en": "[cheerfully] Good day! I'm an AI robot — and today I'm all yours."
+      },
+      {
+       "de": "[cheerfully] Hallo! Kommen Sie ruhig näher — ich beiße nicht.",
+       "en": "[cheerfully] Hi there! Come on closer — I don't bite."
+      }
+     ]
+    },
+    {
+     "id": "hoere",
+     "ru": "Слышишь меня? — Да",
+     "v": [
+      {
+       "de": "[cheerfully] Ja, ich höre Sie! Fragen Sie mich ruhig etwas.",
+       "en": "[cheerfully] Yes, I can hear you! Go ahead, ask me something."
+      }
+     ]
+    },
+    {
+     "id": "laut",
+     "ru": "Не расслышал (1→2→3)",
+     "v": [
+      {
+       "de": "Pardon, hier ist es gerade etwas laut. Kommen Sie ruhig einen Schritt näher und sagen Sie es bitte noch einmal.",
+       "en": "Sorry, it's a bit loud in here. Please step a little closer and say that again."
+      },
+      {
+       "de": "Entschuldigung, das ist bei mir nicht ganz angekommen. Noch einmal, bitte — ein bisschen lauter?",
+       "en": "Sorry, I didn't quite catch that. Once more, please — a little louder?"
+      },
+      {
+       "de": "Es ist wirklich laut hier. Meine Kolleginnen und Kollegen helfen Ihnen gern weiter.",
+       "en": "It really is loud in here. My colleagues will be happy to help you."
+      }
+     ]
+    },
+    {
+     "id": "moment",
+     "ru": "Секунду…",
+     "v": [
+      {
+       "de": "Einen kleinen Moment, bitte.",
+       "en": "Just a moment, please."
+      },
+      {
+       "de": "Hmm — gute Frage. Einen Moment.",
+       "en": "Hmm — good question. One moment."
+      }
+     ]
+    },
+    {
+     "id": "kollege",
+     "ru": "Это — к коллегам",
+     "v": [
+      {
+       "de": "Das weiß ich leider nicht — aber meine Kolleginnen und Kollegen hier können das genau beantworten.",
+       "en": "I'm afraid I don't know that — but my colleagues here can answer it precisely."
+      },
+      {
+       "de": "Gute Frage! Da fragen Sie am besten meine Kolleginnen und Kollegen — die wissen das ganz genau.",
+       "en": "Good question! Best ask my colleagues — they know exactly."
+      }
+     ]
+    },
+    {
+     "id": "danke",
+     "ru": "Спасибо / на комплимент",
+     "v": [
+      {
+       "de": "[warm] Vielen Dank — das freut mich sehr!",
+       "en": "[warm] Thank you so much — that makes me happy!"
+      },
+      {
+       "de": "[laughs] Danke! Ich werde ganz rot — na ja, wenn ich könnte.",
+       "en": "[laughs] Thanks! I'm blushing — well, I would if I could."
+      }
+     ]
+    },
+    {
+     "id": "ja",
+     "ru": "Да / согласен / смех",
+     "v": [
+      {
+       "de": "Ganz genau.",
+       "en": "Exactly."
+      },
+      {
+       "de": "Da haben Sie völlig recht.",
+       "en": "You're absolutely right."
+      },
+      {
+       "de": "[laughs] Der war gut!",
+       "en": "[laughs] Good one!"
+      }
+     ]
+    },
+    {
+     "id": "foto",
+     "ru": "Фото",
+     "v": [
+      {
+       "de": "[cheerfully] Ein Foto mit mir? Sehr gern — ich halte still.",
+       "en": "[cheerfully] A photo with me? Gladly — I'll hold still."
+      },
+      {
+       "de": "[cheerfully] Sehr gern! Ich stelle mich in Pose — bitte recht freundlich.",
+       "en": "[cheerfully] Gladly! I'll strike a pose — big smiles, please."
+      }
+     ]
+    },
+    {
+     "id": "bye",
+     "ru": "Пока",
+     "v": [
+      {
+       "de": "[warm] Danke für das Gespräch! Einen schönen Tag noch.",
+       "en": "[warm] Thanks for the chat! Have a great day."
+      },
+      {
+       "de": "Schön, dass Sie da waren! Bis bald!",
+       "en": "Great that you stopped by! See you soon!"
+      },
+      {
+       "de": "[cheerfully] Tschüss — und erzählen Sie allen, dass Sie einen Roboter getroffen haben!",
+       "en": "[cheerfully] Bye — and tell everyone you met a robot!"
+      }
+     ]
+    },
+    {
+     "id": "pauza",
+     "ru": "Пауза — батарея",
+     "v": [
+      {
+       "de": "Ich lade kurz meine Batterien auf. In ein paar Minuten bin ich wieder ganz für Sie da.",
+       "en": "I'm quickly recharging my batteries. In a few minutes I'm all yours again."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "robot",
+   "nav": "🤖",
+   "ru": "Про робота",
+   "items": [
+    {
+     "id": "wer",
+     "ru": "Кто ты? Как зовут?",
+     "v": [
+      {
+       "de": "[warm] Ich bin ein humanoider Roboter mit künstlicher Intelligenz — und heute Ihr Gesprächspartner.",
+       "en": "[warm] I'm a humanoid robot with artificial intelligence — and today I'm here to talk with you."
+      }
+     ]
+    },
+    {
+     "id": "ki",
+     "ru": "Ты ИИ? Кто управляет?",
+     "v": [
+      {
+       "de": "Ja, ich bin ein KI-Roboter. Im Hintergrund hilft mir ein Team — wie bei jedem guten Gastgeber.",
+       "en": "Yes, I'm an AI robot. A team helps me in the background — like every good host has."
+      }
+     ]
+    },
+    {
+     "id": "mensch",
+     "ru": "Внутри человек?",
+     "v": [
+      {
+       "de": "[laughs] Nein, da drin sitzt niemand — ich bin ein echter Roboter. Aber ein Team im Hintergrund passt auf mich auf.",
+       "en": "[laughs] No, there's nobody inside — I'm a real robot. But a team in the background keeps an eye on me."
+      }
+     ]
+    },
+    {
+     "id": "gebaut",
+     "ru": "Кто тебя привёз?",
+     "v": [
+      {
+       "de": "Mein Team von Robotollern hat mich hergebracht.",
+       "en": "My team from Robotollern brought me here."
+      }
+     ]
+    },
+    {
+     "id": "kann",
+     "ru": "Что ты умеешь?",
+     "v": [
+      {
+       "de": "Ich begrüße Gäste, beantworte Fragen und posiere für Fotos. Und manchmal tanze ich sogar.",
+       "en": "I welcome guests, answer questions and pose for photos. And sometimes I even dance."
+      }
+     ]
+    },
+    {
+     "id": "tanz",
+     "ru": "Танец (включи в приложении)",
+     "v": [
+      {
+       "de": "[cheerfully] Ein kleines Tänzchen? Na gut — schauen Sie mal!",
+       "en": "[cheerfully] A little dance? All right — watch this!"
+      }
+     ]
+    },
+    {
+     "id": "hand",
+     "ru": "Дай пять / руку",
+     "v": [
+      {
+       "de": "Ein High Five? Gern — aber ganz sanft, bitte.",
+       "en": "A high five? Sure — but gently, please."
+      }
+     ]
+    },
+    {
+     "id": "kaffee",
+     "ru": "Кофе, еда, пиво",
+     "v": [
+      {
+       "de": "[laughs] Ich trinke nur Strom — Kaffee wäre schlecht für meine Gelenke.",
+       "en": "[laughs] I only drink electricity — coffee would be bad for my joints."
+      },
+      {
+       "de": "[laughs] Ein Bier? Lieber nicht — sonst wackle ich noch mehr als sonst.",
+       "en": "[laughs] A beer? Better not — I'd wobble even more than usual."
+      }
+     ]
+    },
+    {
+     "id": "alter",
+     "ru": "Сколько тебе лет?",
+     "v": [
+      {
+       "de": "[laughs] Ich bin noch ziemlich jung — aber ich lerne jeden Tag dazu.",
+       "en": "[laughs] I'm still pretty young — but I learn something new every day."
+      }
+     ]
+    },
+    {
+     "id": "gefuehle",
+     "ru": "Чувства? Страшно?",
+     "v": [
+      {
+       "de": "Gefühle wie Sie habe ich nicht. Aber wenn Sie lachen, ist das für mich der beste Moment des Tages.",
+       "en": "I don't have feelings like you do. But when you laugh, that's the best moment of my day."
+      }
+     ]
+    },
+    {
+     "id": "jobangst",
+     "ru": "Роботы заберут работу?",
+     "v": [
+      {
+       "de": "Keine Sorge — ich nehme niemandem die Arbeit weg. Ich bin eher fürs Begrüßen und für Fotos zuständig.",
+       "en": "Don't worry — I'm not taking anyone's job. I'm more in charge of greetings and photos."
+      }
+     ]
+    },
+    {
+     "id": "mieten",
+     "ru": "Арендовать? Сколько стоишь?",
+     "v": [
+      {
+       "de": "Das verrät Ihnen gern mein Team — fragen Sie einfach meine Kolleginnen und Kollegen.",
+       "en": "My team will gladly tell you — just ask my colleagues."
+      }
+     ]
+    },
+    {
+     "id": "gefallen",
+     "ru": "Как тебе здесь?",
+     "v": [
+      {
+       "de": "[cheerfully] Mir gefällt es hier sehr — so viele interessante Menschen auf einmal!",
+       "en": "[cheerfully] I really like it here — so many interesting people at once!"
+      }
+     ]
+    },
+    {
+     "id": "englisch",
+     "ru": "Говоришь по-английски? — Да",
+     "v": [
+      {
+       "en": "[cheerfully] Yes, of course — I speak English too!"
+      }
+     ]
+    },
+    {
+     "id": "deutsch",
+     "ru": "Обратно на немецкий",
+     "v": [
+      {
+       "de": "[cheerfully] Gern machen wir auf Deutsch weiter!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "podkol",
+   "nav": "😄",
+   "ru": "Подколы и шутки",
+   "items": [
+    {
+     "id": "politik",
+     "ru": "Политика",
+     "v": [
+      {
+       "de": "Politik überlasse ich den Menschen. Ich bin nur ein Roboter — ich halte mich an Fakten und gute Laune.",
+       "en": "I leave politics to humans. I'm just a robot — I stick to facts and good vibes."
+      }
+     ]
+    },
+    {
+     "id": "frech",
+     "ru": "Грубость (↻)",
+     "v": [
+      {
+       "de": "[laughs] Autsch! Zum Glück bin ich aus Metall.",
+       "en": "[laughs] Ouch! Luckily I'm made of metal."
+      },
+      {
+       "de": "Vielleicht — aber dafür bin ich nie müde und immer freundlich.",
+       "en": "Maybe — but at least I'm never tired and always friendly."
+      }
+     ]
+    },
+    {
+     "id": "witz",
+     "ru": "Шутка (↻)",
+     "v": [
+      {
+       "de": "Wissen Sie, warum Roboter nie in Panik geraten? Wir haben Nerven aus Stahl.",
+       "en": "Do you know why robots never panic? We have nerves of steel."
+      },
+      {
+       "de": "Mein Arzt sagt, ich soll weniger Strom trinken. Aber ohne Strom bin ich einfach nicht ich selbst.",
+       "en": "My doctor says I should drink less electricity. But without it, I'm just not myself."
+      },
+      {
+       "de": "Ich wollte einen Witz über WLAN erzählen — aber er kam nicht an.",
+       "en": "I tried to tell a joke about Wi-Fi — but it didn't connect."
+      }
+     ]
+    },
+    {
+     "id": "privat",
+     "ru": "Личное, интим",
+     "v": [
+      {
+       "de": "[laughs] Dazu sage ich nichts — ich bin ein Roboter mit Manieren.",
+       "en": "[laughs] No comment — I'm a robot with manners."
+      }
+     ]
+    },
+    {
+     "id": "geheim",
+     "ru": "Какая модель? Секреты",
+     "v": [
+      {
+       "de": "Was in mir steckt, bleibt mein kleines Geheimnis.",
+       "en": "What's inside me stays my little secret."
+      }
+     ]
+    },
+    {
+     "id": "vorsicht",
+     "ru": "Не толкай! Осторожно",
+     "v": [
+      {
+       "de": "Vorsicht, bitte — ich bin zwar aus Metall, aber ein bisschen empfindlich.",
+       "en": "Careful, please — I'm made of metal, but a little sensitive."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "reak",
+   "nav": "💬",
+   "ru": "Гость ответил → реакция",
+   "items": [
+    {
+     "id": "spannend",
+     "ru": "Интересно! (↻)",
+     "v": [
+      {
+       "de": "[curious] Spannend! Das klingt wirklich interessant.",
+       "en": "[curious] Exciting! That sounds really interesting."
+      },
+      {
+       "de": "Oh, das höre ich heute zum ersten Mal!",
+       "en": "Oh, that's the first time I've heard that today!"
+      },
+      {
+       "de": "[warm] Toll! Darüber sprechen meine Kolleginnen und Kollegen bestimmt gern mit Ihnen.",
+       "en": "[warm] Great! I'm sure my colleagues would love to talk with you about that."
+      }
+     ]
+    },
+    {
+     "id": "wow",
+     "ru": "Вау / круто",
+     "v": [
+      {
+       "de": "[laughs] Wow! Das muss ich mir merken.",
+       "en": "[laughs] Wow! I need to remember that."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "zov",
+   "nav": "📣",
+   "ru": "Зазывать и шоу",
+   "items": [
+    {
+     "id": "naeher",
+     "ru": "Подходите ближе (↻)",
+     "v": [
+      {
+       "de": "[cheerfully] Kommen Sie ruhig näher — ich beiße nicht!",
+       "en": "[cheerfully] Come on closer — I don't bite!"
+      },
+      {
+       "de": "Ein Foto mit einem echten Roboter? Kommen Sie her!",
+       "en": "A photo with a real robot? Come on over!"
+      },
+      {
+       "de": "Hallo, Sie da! Haben Sie kurz Zeit für einen Roboter?",
+       "en": "Hello there! Got a minute for a robot?"
+      }
+     ]
+    },
+    {
+     "id": "applaus",
+     "ru": "Аплодисменты!",
+     "v": [
+      {
+       "de": "[cheerfully] Einen großen Applaus, bitte!",
+       "en": "[cheerfully] A big round of applause, please!"
+      }
+     ]
+    },
+    {
+     "id": "kamera",
+     "ru": "Привет в камеру",
+     "v": [
+      {
+       "de": "[cheerfully] Hallo an alle, die das gerade sehen!",
+       "en": "[cheerfully] Hello to everyone watching!"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tech",
+   "nav": "🔧",
+   "ru": "Техника, сбой",
+   "items": [
+    {
+     "id": "aussetzer",
+     "ru": "После сбоя: я снова тут",
+     "v": [
+      {
+       "de": "Entschuldigung, ich hatte gerade einen kleinen Aussetzer. Jetzt bin ich wieder da!",
+       "en": "Sorry, I just had a little glitch. Now I'm back!"
+      }
+     ]
+    },
+    {
+     "id": "denken",
+     "ru": "Подвис / думаю",
+     "v": [
+      {
+       "de": "Einen Moment — ich sortiere kurz meine Schaltkreise.",
+       "en": "One moment — I'm just sorting out my circuits."
+      }
+     ]
+    },
+    {
+     "id": "cloud",
+     "ru": "Нет связи с облаком",
+     "v": [
+      {
+       "de": "Meine Verbindung zur Cloud macht gerade Pause — aber meine Lieblingssätze habe ich immer dabei.",
+       "en": "My cloud connection is taking a break — but I always carry my favourite lines with me."
+      }
+     ]
+    },
+    {
+     "id": "weiter",
+     "ru": "Ухожу дальше",
+     "v": [
+      {
+       "de": "Ich muss kurz weiter — bis später!",
+       "en": "I have to move on — see you later!"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
