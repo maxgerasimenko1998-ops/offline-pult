@@ -1,7 +1,7 @@
 {
  "title": "Робот · без облака",
  "short": "Без облака",
- "version": "18.11.2026 Без облака · 1",
+ "version": "18.11.2026 Без облака · 2",
  "color": "#e0b040",
  "kesh": "offline-pult",
  "voice": "aTTiK3YzK3dXETpuDE2h",
@@ -19,19 +19,19 @@
    "items": [
     {
      "id": "hallo",
-     "ru": "Привет",
+     "ru": "Привет + вопрос о нём",
      "v": [
       {
-       "de": "[warm] Hallo und herzlich willkommen! Schön, dass Sie da sind.",
-       "en": "[warm] Hello and welcome! Great to have you here."
+       "de": "[warm] Hallo und herzlich willkommen! Schön, dass Sie da sind. Was führt Sie heute hierher?",
+       "en": "[warm] Hello and welcome! Great to have you here. What brings you here today?"
       },
       {
-       "de": "[cheerfully] Guten Tag! Ich bin ein KI-Roboter — und heute ganz für Sie da.",
-       "en": "[cheerfully] Good day! I'm an AI robot — and today I'm all yours."
+       "de": "[cheerfully] Guten Tag! Ich bin ein KI-Roboter — und heute ganz für Sie da. Woher kommen Sie?",
+       "en": "[cheerfully] Good day! I'm an AI robot — and today I'm all yours. Where are you from?"
       },
       {
-       "de": "[cheerfully] Hallo! Kommen Sie ruhig näher — ich beiße nicht.",
-       "en": "[cheerfully] Hi there! Come on closer — I don't bite."
+       "de": "[cheerfully] Hallo! Kommen Sie ruhig näher — ich beiße nicht. Was machen Sie beruflich?",
+       "en": "[cheerfully] Hi there! Come on closer — I don't bite. What do you do for a living?"
       }
      ]
     },
@@ -415,12 +415,12 @@
      "ru": "Интересно! (↻)",
      "v": [
       {
-       "de": "[curious] Spannend! Das klingt wirklich interessant.",
-       "en": "[curious] Exciting! That sounds really interesting."
+       "de": "[curious] Spannend! Das klingt wirklich interessant. Wie sind Sie dazu gekommen?",
+       "en": "[curious] Exciting! That sounds really interesting. How did you get into that?"
       },
       {
-       "de": "Oh, das höre ich heute zum ersten Mal!",
-       "en": "Oh, that's the first time I've heard that today!"
+       "de": "Oh, das höre ich heute zum ersten Mal! Was gefällt Ihnen daran am meisten?",
+       "en": "Oh, that's the first time I've heard that today! What do you like most about it?"
       },
       {
        "de": "[warm] Toll! Darüber sprechen meine Kolleginnen und Kollegen bestimmt gern mit Ihnen.",
